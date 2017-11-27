@@ -1,16 +1,11 @@
 package me.verils.transdoc;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
+import me.verils.transdoc.model.DocContent;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
-import me.verils.transdoc.model.DocContent;
 
 public class Transdoc {
 
@@ -57,7 +52,9 @@ public class Transdoc {
 			String filename = file.getName();
 			if (file.exists() && filename.endsWith(".doc") && !filename.startsWith("~")) {
 				if (!docFiles.contains(file)) {
-					docFiles.add(file);
+					if (filename.equals("md.doc")) {
+						docFiles.add(file);
+					}
 				}
 			} else {
 				System.err.println(filename + " - 不是有效的doc文件");
@@ -81,7 +78,9 @@ public class Transdoc {
 			if (listFiles != null && listFiles.length > 0) {
 				for (File file : listFiles) {
 					if (!docFiles.contains(file)) {
-						docFiles.add(file);
+						if (file.getName().equals("md.doc")) {
+							docFiles.add(file);
+						}
 					}
 				}
 			} else {

@@ -1,11 +1,11 @@
 package me.verils.transdoc;
 
-import java.util.List;
-import java.util.Queue;
-
 import me.verils.transdoc.model.DocContent;
 import me.verils.transdoc.model.DocParagraph;
 import me.verils.transdoc.model.DocTable;
+
+import java.util.List;
+import java.util.Queue;
 
 public class MarkdownConverter {
 
@@ -54,9 +54,10 @@ public class MarkdownConverter {
 				content = content.substring(4);
 			} else if (content.startsWith("{l")) {
 				// 列表
-				char ch = content.charAt(2);
-				mdContent.append(ch).append(". ");
-				content = content.substring(4);
+				//{l2}用户在客户端内点击消息或者扫码打开网页。
+				String index = content.substring(2,content.indexOf("}"));
+				mdContent.append(index).append("、");
+				content = content.substring(content.indexOf("}") + 1) + "\n";
 			}
 			mdContent.append(content).append("\n\n");
 		}
