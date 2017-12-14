@@ -35,7 +35,7 @@ public class MarkdownConverter {
 			}
 			if ("{picture}".equals(content)) {
 				// 图片
-				content = "![](" + pictures.poll() + ")";
+				content = "![image](" + pictures.poll() + ")";
 			} else if ("{table}".equals(content)) {
 				// 表格
 				content = toTableMDText(tables.poll());
@@ -47,7 +47,7 @@ public class MarkdownConverter {
 					// 题目前不添加空行
 					mdContent.append("\n");
 				}
-				for (int i = 0; i < lvl; i++) {
+				for (int i = 0; i <= lvl; i++) {
 					mdContent.append("#");
 				}
 				mdContent.append(" ");
@@ -58,6 +58,8 @@ public class MarkdownConverter {
 				String index = content.substring(2,content.indexOf("}"));
 				mdContent.append(index).append("、");
 				content = content.substring(content.indexOf("}") + 1) + "\n";
+			}else if(content.startsWith("<code>")){
+				content = "```\n" + content.substring(6) + "\n```\n" ;
 			}
 			mdContent.append(content).append("\n\n");
 		}

@@ -52,9 +52,7 @@ public class Transdoc {
 			String filename = file.getName();
 			if (file.exists() && filename.endsWith(".doc") && !filename.startsWith("~")) {
 				if (!docFiles.contains(file)) {
-					if (filename.equals("md.doc")) {
-						docFiles.add(file);
-					}
+					docFiles.add(file);
 				}
 			} else {
 				System.err.println(filename + " - 不是有效的doc文件");
@@ -78,9 +76,7 @@ public class Transdoc {
 			if (listFiles != null && listFiles.length > 0) {
 				for (File file : listFiles) {
 					if (!docFiles.contains(file)) {
-						if (file.getName().equals("md.doc")) {
-							docFiles.add(file);
-						}
+						docFiles.add(file);
 					}
 				}
 			} else {
@@ -174,6 +170,9 @@ public class Transdoc {
 	 * @throws IOException
 	 */
 	public static void main(String[] paths) throws IOException {
+
+//		String s = "<code>appId%3d";
+//		System.out.print(s.substring(7));
 		Transdoc transdoc = new Transdoc();
 		if (paths.length > 0) {
 			transdoc.prepareFiles(paths);

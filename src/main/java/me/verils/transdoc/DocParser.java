@@ -1,5 +1,15 @@
 package me.verils.transdoc;
 
+import me.verils.transdoc.model.DocContent;
+import me.verils.transdoc.model.DocParagraph;
+import me.verils.transdoc.model.DocTable;
+import org.apache.poi.hwpf.HWPFDocument;
+import org.apache.poi.hwpf.extractor.WordExtractor;
+import org.apache.poi.hwpf.model.PicturesTable;
+import org.apache.poi.hwpf.model.StyleDescription;
+import org.apache.poi.hwpf.model.StyleSheet;
+import org.apache.poi.hwpf.usermodel.*;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -7,22 +17,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.apache.poi.hwpf.HWPFDocument;
-import org.apache.poi.hwpf.extractor.WordExtractor;
-import org.apache.poi.hwpf.model.PicturesTable;
-import org.apache.poi.hwpf.usermodel.CharacterRun;
-import org.apache.poi.hwpf.usermodel.Paragraph;
-import org.apache.poi.hwpf.usermodel.Picture;
-import org.apache.poi.hwpf.usermodel.Range;
-import org.apache.poi.hwpf.usermodel.Table;
-import org.apache.poi.hwpf.usermodel.TableCell;
-import org.apache.poi.hwpf.usermodel.TableIterator;
-import org.apache.poi.hwpf.usermodel.TableRow;
-
-import me.verils.transdoc.model.DocContent;
-import me.verils.transdoc.model.DocParagraph;
-import me.verils.transdoc.model.DocTable;
 
 public class DocParser {
 
@@ -185,6 +179,20 @@ public class DocParser {
 		boolean isInList = false;
 		for (int i = 0; i < numParagraphs; i++) {
 			Paragraph paragraph = range.getParagraph(i);
+
+			int numStyles = doc.getStyleSheet().numStyles();
+			int styleIndex = paragraph.getStyleIndex();
+			String styleName = "";
+			if (numStyles > styleIndex) {
+				StyleSheet style_sheet = doc.getStyleSheet();
+				StyleDescription style = style_sheet.getStyleDescription(styleIndex);
+				styleName = style.getName();
+				if (styleName != null && styleName.contains("标题") && !styleName.startsWith("目录标题")) {
+					genTitle(WordExtractor.stripFields(paragraph.text()).trim(),paragraphs,styleName);
+					continue;
+				}
+			}
+
 			if (hasPicture(paragraph, picIndex)) {
 				// 图片
 				picIndex++;
@@ -225,10 +233,9 @@ public class DocParser {
 				int lvl = paragraph.getLvl();
 				if (lvl >= 0 && lvl < 6) {
 					// 标题段落处理(由doc段落大纲级别定义)
-					content.append("{h").append(++lvl).append("}")
-							.append(WordExtractor.stripFields(paragraph.text()).trim());
+					content.append("{h").append(++lvl).append("}").append(WordExtractor.stripFields(paragraph.text()).trim());
 					isInList = false;
-				} else {
+				} else  {
 					int numCharacterRuns = paragraph.numCharacterRuns();
 					for (int j = 0; j < numCharacterRuns; j++) {
 						// 检测文本样式
@@ -256,12 +263,43 @@ public class DocParser {
 		docContent.setParagraphs(paragraphs);
 	}
 
+
+	private Integer title1 = 1 ;
+	private Integer title2 = 1;
+	private Integer title3 = 1 ;
+
+	private void genTitle(String content ,LinkedList<DocParagraph> paragraphs, String styleName) {
+		 if (styleName.contains("1")) {
+			 DocParagraph title1Content = new DocParagraph("{h1}"+  title1 + " " + content ) ;
+			 paragraphs.add(title1Content);
+			 title1++;
+			 title2 = 1;
+			 title3 = 1;
+			 return;
+		 }
+
+		if (styleName.contains("2")) {
+			DocParagraph title1Content = new DocParagraph("{h2}" + (title1-1) + "." + title2 + " " + content) ;
+			paragraphs.add(title1Content);
+			title2++;
+			title3 = 1;
+			return;
+		}
+		if (styleName.contains("3")) {
+			DocParagraph title1Content = new DocParagraph("{h3}" + (title1 - 1) + "." + (title2-1) + "." + title3 + " " + content) ;
+			paragraphs.add(title1Content);
+			title3++;
+			return;
+		}
+
+	}
+
 	/**
 	 * 判断段落中是否包含图片
 	 * 
 	 * @param paragraph
 	 * @param picIndex
-	 * @param index
+	 * @param picIndex
 	 *            已解析并识别的图片序号
 	 * @return
 	 */
